@@ -1,25 +1,337 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title: "Reproducible Research - Course Project 1"
+author: "Thomas Hill III"
+date: "February 26, 2019"
+output: html_document
 ---
+```{r setoptions, echo = TRUE}
+```
+##Loading and preprocessing the data  
+Show any code that is needed to  
+1.) Load the data (i.e. read.csv())  
+Note that setting the working directory may or may not be necessary depending on your directory setup.
+```{r}
+#setwd("./Reproducible Research")
+```
+The code below includes a way to measure the time it took to read in the data. You don't have to include the a,b, or b-a code in your file. It makes no difference to anything that comes after. It's just interesting to see.
+```{r}
+a <- Sys.time(); act <- read.csv("activity.csv", as.is = TRUE); b <- Sys.time(); b-a
+```
+2.) Process/transform the data (if necessary) into a format suitable for your analysis  
+[I don't do anything here. All of the data processing is done within the actual answers]
+
+##What is the mean total number of steps taken per day?  
+For this part of the assignment, you can ignore the missing values in the dataset.  
+1.) Calculate the total number of steps taken per day  
+```{r results = "hide", message=FALSE, warning = FALSE}
+library(dplyr)
+library(lubridate)
+```
+```{r}
+act1 <- 
+        act %>%
+        mutate(month = month(ymd(date))
+               , day = day(ymd(date))) %>%
+        group_by(month, day) %>%
+        summarise(sumSteps = sum(steps))
+act1
+```
+2.) Make a histogram of the total number of steps taken each day  
+```{r}
+par(cex = .7)
+hist(act1$sumSteps
+     , col = "green"
+     , main = "Histogram of Total Number of Steps Taken Each Day (act1)"
+     , xlab = "Number of Steps"
+     , ylab = "Number of Days With That Many Steps"
+     , xaxt = "n"
+     , breaks = 61
+)
+axis(side = 1
+     , at = seq(from = 0, to = 25000, by = 1000)
+     , las = 2)
+```
+
+3.) Calculate and report the mean and median of the total number of steps taken per day  
+```{r}       
+act2 <- act %>%
+        mutate(
+                year = year(ymd(date))
+                ,
+                month = month(ymd(date))
+                ,
+                day = day(ymd(date))
+                ,
+                monthDay = as.Date(paste(year(ymd(date)),"-", month,"-", day, sep = ""))
+        ) %>%
+        group_by(monthDay) %>%
+        summarise(
+                meanSteps = mean(steps, na.rm = TRUE),
+                medianSteps = median(steps, na.rm = TRUE)
+        )
+```
+This is the mean data
+```{r}
+a <- !is.na(act2$meanSteps)
+act2$meanSteps[a]
+```
+
+3.) continued - For an over-time graph this is best displayed in a lineplot  
+```{r}
+
+plot(x = act2$monthDay[a]
+     ,y = act2$meanSteps[a]
+     ,type = "l"
+     , col = "darkred"
+     , ylab = "Mean Number of Steps in the Day"
+     , xlab = "Date (in 2012)"
+     , main = "Mean Number of Steps Taken Each Day" 
+     , xaxt = "n"
+     , xlim = c(as.Date("2012-10-01"), as.Date("2012-11-30"))
+)
+axis(side = 1, at = act2$monthDay[seq(from = 1, to = 61, by = 5)], format(act2$monthDay[seq(from = 1, to = 61, by = 5)], "%b %d"), las = 2, cex.axis = .7)
+```
+  
+This is the median data
+```{r}
+act2$medianSteps[a]
+```
+```{r}
+plot(x = act2$monthDay[a]
+     , y = act2$medianSteps[a]
+     , type = "l"
+     , col = "darkslateblue"
+     , ylab = "Median Number of Steps in the Day"
+     , xlab = "Date (in 2012)"
+     , main = "Median Number of Steps Taken Each Day" 
+     , xaxt = "n"
+     , xlim = c(as.Date("2012-10-01"), as.Date("2012-11-30"))
+     , ylim = c(-.1, 35)
+)
+axis(side = 1, at = act2$monthDay[seq(from = 1, to = 61, by = 5)], format(act2$monthDay[seq(from = 1, to = 61, by = 5)], "%b %d"), las = 2, cex.axis = 0.6)
+```
+
+##What is the average daily activity pattern?  
+1.) Make a time series plot (i.e. type = "l")  of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis).  
+```{r}
+act3 <- act %>%
+        group_by(interval) %>%
+        summarise(
+                meanStepsTI = mean(steps, na.rm = TRUE)
+        )
+act3
+```
+```{r}
+plot(x = act3$interval[a]
+     ,y = act3$meanStepsTI[a]
+     ,type = "l"
+     , col = "black"
+     , ylab = "Mean Number of Steps in Each Time Interval"
+     , xlab = "Time Interval"
+     , main = "Average Number of Steps Taken in Each Time Interval"
+     , xaxt = "n"
+     , xlim = c(min(act3$interval[a]), max(act3$interval[a]))
+)
+axis(side = 1, at = act3$interval[rep(c(T,F,F,F,F,F,F,F,F,F,F,F), 24)], las = 2, cex.axis = .7)
+```
+       
+2.) Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?  
+```{r results = "hide"}
+maxMeanStepsTI <- max(y = act3$meanStepsTI[a])
+maxMeanStepsTI #206.1698
+maxStepsIntervalIndex <- which(act3$meanStepsTI == maxMeanStepsTI)
+maxStepsIntervalIndex
+```
+```{r}
+act3$interval[maxStepsIntervalIndex]
+```
+####So the 835-840 interval has the greatest average number of steps across all the days.  
+  
+##Imputing missing values
+Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.  
+ 
+1.) Calculate and report the total number of missing values in the dataset (i.e. # total number of rows with NAs).  
+```{r}
+sum(is.na(act$steps))
+sum(is.na(act$date))
+sum(is.na(act$interval))
+```
+There are 2304 missing values, and they are all in "steps". Note that 2304 = 8 days * 288 intervals/day.  
+
+2.) Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.  
+   
+Personal note: I could use a simple mean here.  
+*a.) Would a linear regression over each day make any sort of sense? It might, but coding it is going to be a mite complicated.  
+*b.) perhaps some sort of simple linear interpolation? But not all the missing values are flanked by present values.  
+*c.) Some days are missing data completely, so we can't use a daily average.  
+*d.) Perhaps the simplest (and most comprehensive) thing to do then is to use the multi-day average for the specific interval.  
+  
+3.) Create a new dataset that is equal to the original dataset but with the missing data filled in.  
+```{r results = "hide"}
+act5 <- act
+act4 <- act %>% filter(is.na(steps))
+dim(act4) #2304x3
 
 
-## Loading and preprocessing the data
+for (interv in act4$interval) {
+        indexList <- grep(interv, act4$interval)
+        act4$steps[indexList] <- act3$meanStepsTI[indexList[1]]
+}
+```
+We can check our work.  
+```{r}
+head(act4)
+```
+Great. Looks like we've got the new data. Now we just have to put it into the main dataframe.  
+```{r}
+for (i in 1:length(act$steps)) {
+        if (is.na(act5$steps[i])) {
+                act5$steps[i] <- act4$steps[(i %% 288)+1]
+        }
+}
+sum(is.na(act5$steps))
+```
+Looks good.  
+This means that there are no missing values in the steps column any longer.  
+  
+We can check our work -  
+```{r}
+head(act5); 
+```
+```{r}
+head(act)
+```
+Note that these show the same identifying columns and the NAs have been replaced.
+That's good. That's what we wanted.  
+  
+4.a.)Make a histogram of the total number of steps taken each day  
+```{r}
+library(dplyr)
+library(lubridate)
+act6 <- act5 %>%
+        mutate(
+                month = month(ymd(as.character(date)))
+                ,
+                day = day(ymd(date))
+                ,
+                year = year(ymd(date))
+                ,
+                yearMonthDay = as.Date(paste(year, "-", month, "-", day, sep = ""))
+        ) %>%
+        group_by(yearMonthDay) %>%
+        summarise(
+                sumStepsTI = sum(steps),
+                meanStepsTI = mean(steps),
+                medianStepsTI = median(steps)
+        )
+act6
+```
+```{r}
+par(mar = c(4,2,3,1))
+hist(act6$sumStepsTI
+     , col = "green"
+     , main = "Histogram of Number of Daily Steps (act6)"
+     , xlab = "Number of Steps"
+     , ylab = "Number of Days With That Many Steps"
+     , xaxt = "n"
+     , breaks = 61
+     , ylim = c(0,7)
+)
+mtext("(Y axis rescaled to match the first histogram)")
+axis(side = 1
+     , at = seq(from = 0, to = 25000, by = 1000)
+     , las = 2
+)
+```
+  
+4.b.)Calculate and report the mean and median total number of steps taken per day.  
+This is the mean data
+```{r}
+act6$meanStepsTI
+```
+  
+This is a graph of the mean data.
+```{r}
+plot(
+        x = act6$yearMonthDay
+        ,y = act6$meanStepsTI
+        ,col = "darkred"
+        ,type = "l"
+        ,pch = floor(runif(1, 1, 26))
+        ,ylab = "Mean Number of Steps"
+        ,main = "Mean Number of Steps in the Day"
+        ,xlab = "Date"
+        ,xaxt = "n"
+        ,xlim = c(as.Date("2012-10-01"), as.Date("2012-11-30"))
+)
+labels <- act6$yearMonthDay[seq(from = 1, to = 61, by = 5)]
+axis(side = 1, at = labels, format(labels, "%b %d"), las = 2, cex.axis = .7)
+```
+  
+This is a graph of the median data.
+```{r}
+plot(
+        x = act6$yearMonthDay
+        ,y = act6$medianStepsTI
+        ,col = "darkslateblue"
+        ,ylab = "Median Number of Steps"
+        ,main = "Median Number of Steps in the Day"
+        ,xlab = "Date"
+        ,xaxt = "n"
+        ,xlim = c(as.Date("2012-10-01"), as.Date("2012-11-30"))
+        ,ylim = c(-.1, 35)
+)
+axis(side = 1, at = labels, format(labels, "%b %d"), las = 2, cex.axis = 0.6)
+```
 
 
+  
+Do these values differ from the estimates from the first part of the assignment?   
+ *-Histogram is mostly the same except for a jump in the 10500-11000.   
+ *-Median graph just shows some non-zero values.  
+ -Mean graph shows very little change, but there is some.  
 
-## What is mean total number of steps taken per day?
+What is the impact of imputing missing data on the estimates of the total daily number of steps?  
+ -It doesn't change much. We see a single large jump for the 10500-11000 interval and a few other minor increments in other bars.  
 
-
-
-## What is the average daily activity pattern?
-
-
-
-## Imputing missing values
-
-
-
-## Are there differences in activity patterns between weekdays and weekends?
+##Are there differences in activity patterns between weekdays and weekends?  
+1.) Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.  
+```{r}
+library(lubridate)
+is.weekend <- function(input) {
+        input <- as.Date(input)
+        if (wday(input) %in% c(1, 7)) {
+                return("weekend")
+        } else {
+                return("weekday")
+        }
+}
+table(sapply(act$date, is.weekend))
+```
+See that there are 12960 of weekday and 4608 of weekend.  
+Note that 4608 = 8 weekends * 2 days/weekend * 288 intervals/day.  
+```{r}
+act7 <- act5
+act7$WKND <- factor(sapply(act$date, is.weekend))
+```
+  
+Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).  
+```{r}
+act8 <- act7 %>%
+        group_by(interval, WKND) %>%
+        summarise(
+                meanStepsTI = mean(steps, na.rm = TRUE)
+        )
+act8
+```
+```{r}
+library(lattice)
+xyplot(act8$meanStepsTI ~ act8$interval |
+               WKND
+       ,data = act8
+       ,xlab = "Interval Start"
+       ,ylab = "Mean Steps"
+       ,type = "l"
+       ,main = "Mean Number of Steps per Interval"
+       ,layout = c(1,2))
+```
