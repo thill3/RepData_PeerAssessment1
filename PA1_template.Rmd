@@ -2,8 +2,12 @@
 title: "Reproducible Research - Course Project 1"
 author: "Thomas Hill III"
 date: "February 26, 2019"
-output: html_document
+output: md_document
+keep_md: true
 ---
+```{r echo = TRUE, results = "hide"}
+fig.path='figure/'
+```
 ```{r setoptions, echo = TRUE}
 ```
 ##Loading and preprocessing the data  

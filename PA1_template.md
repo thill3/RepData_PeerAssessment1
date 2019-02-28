@@ -1,3 +1,5 @@
+    fig.path='figure/'
+
 Loading and preprocessing the data
 ----------------------------------
 
@@ -15,7 +17,7 @@ to see.
 
     a <- Sys.time(); act <- read.csv("activity.csv", as.is = TRUE); b <- Sys.time(); b-a
 
-    ## Time difference of 0.08788514 secs
+    ## Time difference of 0.07635212 secs
 
 2.) Process/transform the data (if necessary) into a format suitable for
 your analysis  
@@ -71,7 +73,7 @@ the dataset.
          , at = seq(from = 0, to = 25000, by = 1000)
          , las = 2)
 
-![](PA1_template_files/figure-markdown_strict/unnamed-chunk-5-1.png)
+![](PA1_template_files/figure-markdown_strict/unnamed-chunk-6-1.png)
 
 3.) Calculate and report the mean and median of the total number of
 steps taken per day
@@ -122,7 +124,7 @@ lineplot
     )
     axis(side = 1, at = act2$monthDay[seq(from = 1, to = 61, by = 5)], format(act2$monthDay[seq(from = 1, to = 61, by = 5)], "%b %d"), las = 2, cex.axis = .7)
 
-![](PA1_template_files/figure-markdown_strict/unnamed-chunk-8-1.png)
+![](PA1_template_files/figure-markdown_strict/unnamed-chunk-9-1.png)
 
 This is the median data
 
@@ -144,7 +146,7 @@ This is the median data
     )
     axis(side = 1, at = act2$monthDay[seq(from = 1, to = 61, by = 5)], format(act2$monthDay[seq(from = 1, to = 61, by = 5)], "%b %d"), las = 2, cex.axis = 0.6)
 
-![](PA1_template_files/figure-markdown_strict/unnamed-chunk-10-1.png)
+![](PA1_template_files/figure-markdown_strict/unnamed-chunk-11-1.png)
 
 What is the average daily activity pattern?
 -------------------------------------------
@@ -187,7 +189,7 @@ What is the average daily activity pattern?
     )
     axis(side = 1, at = act3$interval[rep(c(T,F,F,F,F,F,F,F,F,F,F,F), 24)], las = 2, cex.axis = .7)
 
-![](PA1_template_files/figure-markdown_strict/unnamed-chunk-12-1.png)
+![](PA1_template_files/figure-markdown_strict/unnamed-chunk-13-1.png)
 
 2.) Which 5-minute interval, on average across all the days in the
 dataset, contains the maximum number of steps?
@@ -362,7 +364,7 @@ replaced. That's good. That's what we wanted.
          , las = 2
     )
 
-![](PA1_template_files/figure-markdown_strict/unnamed-chunk-22-1.png)
+![](PA1_template_files/figure-markdown_strict/unnamed-chunk-23-1.png)
 
 4.b.)Calculate and report the mean and median total number of steps
 taken per day.  
@@ -399,7 +401,7 @@ This is a graph of the mean data.
     labels <- act6$yearMonthDay[seq(from = 1, to = 61, by = 5)]
     axis(side = 1, at = labels, format(labels, "%b %d"), las = 2, cex.axis = .7)
 
-![](PA1_template_files/figure-markdown_strict/unnamed-chunk-24-1.png)
+![](PA1_template_files/figure-markdown_strict/unnamed-chunk-25-1.png)
 
 This is a graph of the median data.
 
@@ -416,7 +418,7 @@ This is a graph of the median data.
     )
     axis(side = 1, at = labels, format(labels, "%b %d"), las = 2, cex.axis = 0.6)
 
-![](PA1_template_files/figure-markdown_strict/unnamed-chunk-25-1.png)
+![](PA1_template_files/figure-markdown_strict/unnamed-chunk-26-1.png)
 
 Do these values differ from the estimates from the first part of the
 assignment?  
@@ -494,4 +496,4 @@ averaged across all weekday days or weekend days (y-axis).
            ,main = "Mean Number of Steps per Interval"
            ,layout = c(1,2))
 
-![](PA1_template_files/figure-markdown_strict/unnamed-chunk-29-1.png)
+![](PA1_template_files/figure-markdown_strict/unnamed-chunk-30-1.png)

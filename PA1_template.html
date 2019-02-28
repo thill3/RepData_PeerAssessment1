@@ -192,6 +192,7 @@ $(document).ready(function () {
 </div>
 
 
+<pre class="r"><code>fig.path='figure/'</code></pre>
 <div id="loading-and-preprocessing-the-data" class="section level2">
 <h2>Loading and preprocessing the data</h2>
 <p>Show any code that is needed to<br />
@@ -200,7 +201,7 @@ Note that setting the working directory may or may not be necessary depending on
 <pre class="r"><code>#setwd(&quot;./Reproducible Research&quot;)</code></pre>
 <p>The code below includes a way to measure the time it took to read in the data. You don’t have to include the a,b, or b-a code in your file. It makes no difference to anything that comes after. It’s just interesting to see.</p>
 <pre class="r"><code>a &lt;- Sys.time(); act &lt;- read.csv(&quot;activity.csv&quot;, as.is = TRUE); b &lt;- Sys.time(); b-a</code></pre>
-<pre><code>## Time difference of 0.0796628 secs</code></pre>
+<pre><code>## Time difference of 0.06876206 secs</code></pre>
 <p>2.) Process/transform the data (if necessary) into a format suitable for your analysis<br />
 [I don’t do anything here. All of the data processing is done within the actual answers]</p>
 </div>
